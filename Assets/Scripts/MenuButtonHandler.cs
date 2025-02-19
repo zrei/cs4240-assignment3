@@ -9,12 +9,12 @@ public enum PlayState
     DELETE_FURNITURE
 }
 
-public class MenuButtonHandler : MonoBehaviour
+public class MenuButtonHandler : Singleton<MenuButtonHandler>
 {
     [System.Serializable]
     public struct PlayStateButton
     {
-        public Button Button;
+        public MenuButton Button;
         public PlayState PlayState;
     }
 
@@ -22,13 +22,15 @@ public class MenuButtonHandler : MonoBehaviour
     [SerializeField] private FurnitureDropdown m_FurnitureDropdown;
 
     public PlayState CurrPlayState {get; private set;} = PlayState.NONE;
+    public GameObject CurrFurniturePrefab => m_FurnitureDropdown.CurrSelectedFurniturePrefab;
+    private MenuButton m_CurrSelectedButton = null;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
     {
         foreach (PlayStateButton playStateButton in m_PlayStateButtons)
         {
-            playStateButton.Button.onClick.AddListener(() => OnPlayStateButtonPressed(playStateButton));
+            playStateButton.Button.OnPressedAction += () => OnPlayStateButtonPressed(playStateButton);
         }
     }
 
@@ -36,7 +38,7 @@ public class MenuButtonHandler : MonoBehaviour
     {
         foreach (PlayStateButton playStateButton in m_PlayStateButtons)
         {
-            playStateButton.Button.onClick.RemoveAllListeners();
+            playStateButton.Button.ClearEvents();
         }
     }
 
@@ -45,18 +47,21 @@ public class MenuButtonHandler : MonoBehaviour
         if (CurrPlayState == playStateButton.PlayState)
             return;
 
-        playStateButton.Button.Select();
+        if (m_CurrSelectedButton)
+            m_CurrSelectedButton.ToggleSelected(false);
+        playStateButton.Button.ToggleSelected(true);
+        m_CurrSelectedButton = playStateButton.Button;
 
         if (CurrPlayState == PlayState.PLACE_FURNITURE)
         {
-            // compress dropdown
+            m_FurnitureDropdown.ToggleDropdown(false);
         }
 
         CurrPlayState = playStateButton.PlayState;
 
         if (CurrPlayState == PlayState.PLACE_FURNITURE)
         {
-            // expand dropdown
+            m_FurnitureDropdown.ToggleDropdown(true);
         }
     }
 }
