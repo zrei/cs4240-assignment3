@@ -16,6 +16,7 @@ public class TriggerCapture : MonoBehaviour {
 
     public bool UseSimple = false;
     
+#if UNITY_EDITOR
     public void TakeScreenshot() {
        var cam = Camera.main;
        // Set a mask to only draw only elements in this layer. e.g., capture your player with a transparent background.
@@ -52,6 +53,7 @@ public class TriggerCapture : MonoBehaviour {
         clone.name = gameObject.name;
         clone.transform.localPosition = Vector3.zero;
     }
+#endif
 }
 
 #if UNITY_EDITOR
@@ -109,7 +111,6 @@ public class TriggerCaptureEditor : Editor
         return splitPath[splitPath.Length - 1];
     }
 }
-#endif
 
 public static class CaptureScreenshot {
     public static void CaptureTransparentScreenshot(Camera cam, int width, int height, string screengrabfile_path, string assetRelativeFilepath) {
@@ -219,3 +220,4 @@ public static class CaptureScreenshot {
         AssetDatabase.Refresh();
     }
 }
+#endif
