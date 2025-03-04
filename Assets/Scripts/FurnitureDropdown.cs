@@ -14,14 +14,19 @@ public class FurnitureDropdown : MonoBehaviour
     [SerializeField] private MenuButton m_MenuButtonPrefab;
     [SerializeField] private float m_TotalTime;
 
+    public FurnitureInfo CurrSelectedFurnitureInfo { get; private set; } = null;
+
     private Coroutine m_CurrPlayingCoroutine = null;
 
-    public GameObject CurrSelectedFurniturePrefab {get; private set;} = null;
+    public GameObject CurrSelectedFurniturePrefab { get; private set; } = null;
 
     private List<MenuButton> m_MenuButtons = new();
 
     private RectTransform m_ViewportParent;
     private MenuButton m_CurrSelectedButton = null;
+    [SerializeField] private FurnitureGridTest m_FurnitureGridTest;
+
+    public float GridSize => m_FurnitureGridTest.GridSize;
 
     private void Start()
     {
@@ -50,7 +55,9 @@ public class FurnitureDropdown : MonoBehaviour
         button.ToggleSelected(true);
         m_CurrSelectedButton = button;
         CurrSelectedFurniturePrefab = furnitureInfo.FurniturePrefab;
+        CurrSelectedFurnitureInfo = furnitureInfo; // Store the full info
     }
+
 
     public void ToggleDropdown(bool expand)
     {
@@ -80,7 +87,7 @@ public class FurnitureDropdown : MonoBehaviour
 
         float initialHeight = m_ViewportRectTransform.offsetMin.y;
         float targetHeight = expand ? 0f : m_ViewportParent.rect.height;
-        
+
         float initialAlpha = m_CanvasGroup.alpha;
         float targetAlpha = expand ? 1f : 0f;
 
@@ -105,12 +112,18 @@ public class FurnitureDropdown : MonoBehaviour
 
         m_CanvasGroup.alpha = targetAlpha;
     }
+    public FurnitureInfo GetCurrentFurnitureInfo()
+    {
+        return CurrSelectedFurnitureInfo;
+    }
 
-    #if UNITY_EDITOR
+
+
+#if UNITY_EDITOR
     public void SetDropdownContent(FurnitureInfo[] furnitureInfo)
     {
         m_FurnitureInfo = furnitureInfo;
         EditorUtility.SetDirty(this.gameObject);
     }
-    #endif
+#endif
 }
