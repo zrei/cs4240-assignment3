@@ -22,7 +22,7 @@ public class MenuButtonHandler : Singleton<MenuButtonHandler>
     [SerializeField] private FurnitureDropdown m_FurnitureDropdown;
 
     public PlayState CurrPlayState {get; private set;} = PlayState.NONE;
-    public GameObject CurrFurniturePrefab => m_FurnitureDropdown.CurrSelectedFurniturePrefab;
+    public GameObject CurrFurniturePrefab => m_FurnitureDropdown.CurrSelectedFurnitureInfo.FurniturePrefab;
     private MenuButton m_CurrSelectedButton = null;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

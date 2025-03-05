@@ -8,6 +8,9 @@ public class FurnitureGridTest : MonoBehaviour
     [SerializeField] private Transform m_PlaneTransform;
     [SerializeField] private Transform m_FurnitureTransform;
 
+    public float GridSize => m_GridSize;
+
+
     public void PlaceFurniture()
     {
         m_FurnitureTransform.localScale = Vector3.one;

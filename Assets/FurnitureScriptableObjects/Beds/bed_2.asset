@@ -14,3 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FurniturePrefab: {fileID: 100014, guid: b4bf5e3a00974a94ea1549814fc16ebf, type: 3}
   FurnitureSprite: {fileID: 21300000, guid: 3ec3ca1c3fc75443a84ac32a44d1e254, type: 3}
+  collisionBoundsOverride: {x: 0, y: 0, z: 0}
+  clearanceRadius: 0.2
+  collisionCheckMask:
+    serializedVersion: 2
+    m_Bits: 64
