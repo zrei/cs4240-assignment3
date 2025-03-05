@@ -1,4 +1,6 @@
 ## How to Play
+The game is found in MainScene.
+
 The game will detect planes and project a wooden floor plane on detected planes. Furniture is placed in a grid on the wooden floor plane - if a piece of furniture is already present in a grid cell, no other piece of furniture can be placed there.
 
 In the menu buttons, you can select three modes: Place, Relocate and Delete.
