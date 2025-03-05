@@ -1,61 +1,38 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class FurnitureDeleter : MonoBehaviour
 {
-    private Camera mainCamera;
+    [SerializeField] private LayerMask m_FurnitureLayerMask;
 
-    void Start()
+    private void OnEnable()
     {
-        mainCamera = Camera.main; 
+        InputHandler.Instance.TapBeginEvent += TryDelete;
     }
 
-    void Update()
+    private void OnDisable()
     {
-        // if (FurnitureManager.Instance == null)
-        // {
-        //     Debug.LogError("FurnitureManager.Instance is NULL! Make sure it's assigned.");
-        //     return;
-        // }
+        InputHandler.Instance.TapBeginEvent -= TryDelete;
+    }
 
-        if (FurnitureManager.Instance.currentMode != FurnitureManager.Mode.Delete)
+    private void TryDelete()
+    {
+        if (MenuButtonHandler.Instance.HadButtonPressThisFrame)
             return;
 
+        if (!GridHandler.Instance.PlacementPoseIsValid)
+            return;
 
-        if (Mouse.current?.leftButton.wasPressedThisFrame == true)
+        Ray ray = Camera.main.ScreenPointToRay(InputHandler.Instance.TouchPosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, m_FurnitureLayerMask))
         {
-            TryDelete(Mouse.current.position.ReadValue());
-        }
+            Furniture furniture = hit.collider.gameObject.GetComponentInParent<Furniture>();
 
-        if (Touchscreen.current?.primaryTouch.press.isPressed == true)
-        {
-            TryDelete(Touchscreen.current.primaryTouch.position.ReadValue());
-        }
-    }
-
-    void TryDelete(Vector2 screenPosition)
-    {
-
-        Ray ray = mainCamera.ScreenPointToRay(screenPosition);
-        RaycastHit hit;
-        int furnitureLayerMask = LayerMask.GetMask("Furniture");
-
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, furnitureLayerMask))
-        {
-
-            if (hit.collider.CompareTag("Furniture"))
+            if (furniture)
             {
-                Fruniture furniture = hit.collider.gameObject.GetComponentInParent<Fruniture>();
-
-                if (furniture)
-                {
-                    Destroy(furniture.gameObject);
-                    FurnitureManager.Instance.selectedFurniturePrefab = null;
-                }
-                
+                Destroy(furniture.gameObject);
             }
         }
-
     }
 }
 

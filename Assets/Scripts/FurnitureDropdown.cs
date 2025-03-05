@@ -24,10 +24,6 @@ public class FurnitureDropdown : MonoBehaviour
     private RectTransform m_ViewportParent;
     private MenuButton m_CurrSelectedButton = null;
 
-    [SerializeField] private FurnitureGridTest m_FurnitureGridTest;
-
-    public float GridSize => m_FurnitureGridTest.GridSize;
-
     public event Action OnSwitchFurnitureEvent;
 
     private void Start()

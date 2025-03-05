@@ -1,104 +1,80 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR.ARFoundation;
-using UnityEngine.XR.ARSubsystems;
-using UnityEngine.InputSystem;
 
-public class FurnitureRelocator : MonoBehaviour
+public class FurnitureRelocator : FurniturePositionHandler
 {
-    private GameObject selectedFurniture;
-    private bool isHolding = false;
-    private ARRaycastManager arRaycastManager;
-    private Camera mainCamera;
-    private Vector2 touchPosition;
+    [SerializeField] private LayerMask m_FurnitureLayerMask;
 
-    void Start()
+    private FurnitureInfo m_SelectedFurniture;
+    private Vector3 m_PreviousLocalPosition;
+    private Quaternion m_PreviousLocalRotation;
+    private bool m_IsHolding = false;
+
+    protected override void OnEnable()
     {
-        arRaycastManager = FindFirstObjectByType<ARRaycastManager>();
-        mainCamera = Camera.main;
+        base.OnEnable();
+
+        m_IsHolding = false;
     }
 
-    void Update()
+    protected override bool ShouldPreview()
     {
-        if (FurnitureManager.Instance.currentMode != FurnitureManager.Mode.Relocate)
+        return base.ShouldPreview() && m_IsHolding;
+    }
+
+    protected override FurnitureInfo GetFurnitureInfo()
+    {
+        return m_SelectedFurniture;
+    }
+
+    protected override GameObject GetFurniturePrefab()
+    {
+        return m_SelectedFurniture.FurniturePrefab;
+    }
+
+    protected override void HandleTapBeginInput()
+    {
+        base.HandleTapBeginInput();
+
+        if (!GridHandler.Instance.PlacementPoseIsValid)
             return;
 
-        if (!isHolding)
+        Ray ray = Camera.main.ScreenPointToRay(InputHandler.Instance.TouchPosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, m_FurnitureLayerMask))
         {
-            if (Mouse.current?.leftButton.wasPressedThisFrame == true)
+            Furniture furniture = hit.collider.gameObject.GetComponentInParent<Furniture>();
+
+            if (furniture)
             {
-                TrySelectFurniture(Mouse.current.position.ReadValue());
-            }
-            if (Touchscreen.current?.primaryTouch.press.wasPressedThisFrame == true)
-            {
-                TrySelectFurniture(Touchscreen.current.primaryTouch.position.ReadValue());
-            }
-        }
-        else
-        {
-            MoveFurnitureWithTouch();
-        }
-    }
-
-    void TrySelectFurniture(Vector2 screenPosition)
-    {
-        if (mainCamera == null)
-        {
-            Debug.LogError("❌ No Camera Assigned!");
-            return;
-        }
-
-        Ray ray = mainCamera.ScreenPointToRay(screenPosition);
-        RaycastHit hit;
-        int furnitureLayerMask = LayerMask.GetMask("Furniture");
-
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, furnitureLayerMask))
-        {
-            Debug.Log("🎯 Raycast Hit: " + hit.collider.name);
-            if (hit.collider.CompareTag("Furniture"))
-            {
-                selectedFurniture = hit.collider.gameObject;
-                isHolding = true;
-                Debug.Log("✅ Picked up: " + selectedFurniture.name);
-            }
-        }
-        else
-        {
-            Debug.Log("❌ Raycast hit nothing. Check layers and colliders.");
-        }
-    }
-
-    void MoveFurnitureWithTouch()
-    {
-        if (selectedFurniture == null) return;
-
-        if (Input.touchCount > 0)
-        {
-            Touch touch = Input.GetTouch(0);
-            touchPosition = touch.position;
-
-            List<ARRaycastHit> hits = new List<ARRaycastHit>();
-            if (arRaycastManager.Raycast(touchPosition, hits, TrackableType.Planes))
-            {
-                Pose hitPose = hits[0].pose;
-                selectedFurniture.transform.position = hitPose.position;
-            }
-
-            if (touch.phase == UnityEngine.TouchPhase.Ended)
-            {
-                PlaceFurniture();
+                m_SelectedFurniture = furniture.FurnitureInfo;
+                m_PreviousLocalPosition = furniture.transform.localPosition;
+                m_PreviousLocalRotation = furniture.transform.localRotation;
+                Destroy(furniture.gameObject);
+                m_IsHolding = true;
             }
         }
     }
 
-    public void PlaceFurniture()
+    protected override bool ShouldPlaceFurniture()
     {
-        if (selectedFurniture != null)
-        {
-            isHolding = false;
-            Debug.Log("✅ Placed: " + selectedFurniture.name);
-            selectedFurniture = null;
-        }
+        return base.ShouldPlaceFurniture() && m_IsHolding;
+    }
+
+    protected override void HandlePlacementInput()
+    {
+        base.HandlePlacementInput();
+
+        m_IsHolding = false;
+    }
+
+    protected override void OnCancelPreview()
+    {
+        base.OnCancelPreview();
+
+        if (m_IsHolding)
+            PlaceFurniture(m_PreviousLocalPosition, m_PreviousLocalRotation);
+
+        m_IsHolding = false;
     }
 }
 
