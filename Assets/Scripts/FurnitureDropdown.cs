@@ -31,7 +31,7 @@ public class FurnitureDropdown : MonoBehaviour
     public event Action OnSwitchFurnitureEvent;
 
     private void Start()
-    {
+    {   
         m_ViewportParent = m_ViewportRectTransform.parent.GetComponent<RectTransform>();
         foreach (FurnitureInfo furnitureInfo in m_FurnitureInfo)
         {
