@@ -23,8 +23,17 @@ public class FurnitureDropdown : MonoBehaviour
     private RectTransform m_ViewportParent;
     private MenuButton m_CurrSelectedButton = null;
 
+    private FurnitureManager furnitureManager;
+
     private void Start()
-    {
+    {   
+        furnitureManager = FindFirstObjectByType<FurnitureManager>();
+        if (furnitureManager == null)
+        {
+            Debug.LogError("❌ FurnitureManager not found in the scene!");
+            return;
+        }
+
         m_ViewportParent = m_ViewportRectTransform.parent.GetComponent<RectTransform>();
         foreach (FurnitureInfo furnitureInfo in m_FurnitureInfo)
         {
@@ -49,7 +58,8 @@ public class FurnitureDropdown : MonoBehaviour
             m_CurrSelectedButton.ToggleSelected(false);
         button.ToggleSelected(true);
         m_CurrSelectedButton = button;
-        CurrSelectedFurniturePrefab = furnitureInfo.FurniturePrefab;
+        // CurrSelectedFurniturePrefab = furnitureInfo.FurniturePrefab;
+        furnitureManager.SetSelectedFurniturePrefab(furnitureInfo.FurniturePrefab);
     }
 
     public void ToggleDropdown(bool expand)
